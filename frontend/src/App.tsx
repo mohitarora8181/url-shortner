@@ -345,7 +345,6 @@ function AuthShell({ onAuth, notify }: { onAuth: (payload: AuthPayload) => void;
           <div>
             <p className="eyebrow">Google access</p>
             <h2>Continue with your Google account</h2>
-            <p className="auth-copy">Your account is created automatically the first time Google verifies your identity.</p>
           </div>
 
           {googleClientId ? (
