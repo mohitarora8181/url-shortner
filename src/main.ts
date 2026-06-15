@@ -26,7 +26,7 @@ const formatValidationErrors = (errors: ValidationError[]): ValidationErrorDetai
 
 let isAppInitialized = false;
 
-async function bootstrap(): Promise<void> {
+async function bootstrap(): Promise<any> {
   if (isAppInitialized) return;
   const app = await NestFactory.create(AppModule , new ExpressAdapter(server));
 
@@ -54,8 +54,17 @@ async function bootstrap(): Promise<void> {
   await app.init();
   isAppInitialized = true;
   Logger.log(`URL shortener API listening on ${config.publicBaseUrl}`, "Bootstrap");
+
+  if (process.env.NODE_ENV !== 'production') {
+    await app.listen(config.port);
+    Logger.log(`URL shortener API listening on http://localhost:${config.port}`, "Bootstrap");
+  }
+
+  return server;
 }
 
-void bootstrap();
+void bootstrap().catch((err) => {
+  Logger.error("Bootstrap failed", err, "Bootstrap");
+});;
 
 export default server;
