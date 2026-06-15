@@ -1,15 +1,14 @@
 {
   "version": 2,
-  "builds": [
+  "rewrites": [
     {
-      "src": "dist/main.js",
-      "use": "@vercel/node"
+      "source": "/(.*)",
+      "destination": "/api/main"
     }
   ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "dist/main.js"
+  "functions": {
+    "api/main.ts": {
+      "runtime": "@vercel/node"
     }
-  ]
+  }
 }
