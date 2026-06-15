@@ -6,6 +6,9 @@ import helmet from "helmet";
 import { AppModule } from "./app.module";
 import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
 import { config } from "./config/env";
+import express from "express";
+
+const server = express()
 
 type ValidationErrorDetail = {
   property: string;
@@ -48,3 +51,5 @@ async function bootstrap(): Promise<void> {
 }
 
 void bootstrap();
+
+export default server;
