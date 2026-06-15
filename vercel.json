@@ -1,14 +1,9 @@
 {
   "version": 2,
-  "rewrites": [
+  "routes": [
     {
-      "source": "/(.*)",
-      "destination": "/api/main"
+      "src": "/(.*)",
+      "dest": "src/main.ts"
     }
-  ],
-  "functions": {
-    "api/main.ts": {
-      "runtime": "@vercel/node"
-    }
-  }
+  ]
 }
