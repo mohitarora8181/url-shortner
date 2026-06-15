@@ -7,6 +7,7 @@ import { AppModule } from "./app.module";
 import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
 import { config } from "./config/env";
 import express from "express";
+import { ExpressAdapter } from "@nestjs/platform-express";
 
 const server = express()
 
@@ -23,8 +24,11 @@ const formatValidationErrors = (errors: ValidationError[]): ValidationErrorDetai
     children: error.children?.length ? formatValidationErrors(error.children) : undefined
   }));
 
+let isAppInitialized = false;
+
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule);
+  if (isAppInitialized) return;
+  const app = await NestFactory.create(AppModule , new ExpressAdapter(server));
 
   app.getHttpAdapter().getInstance().disable("x-powered-by");
   app.use(helmet());
@@ -46,7 +50,9 @@ async function bootstrap(): Promise<void> {
     })
   );
 
-  await app.listen(config.port);
+  // await app.listen(config.port);
+  await app.init();
+  isAppInitialized = true;
   Logger.log(`URL shortener API listening on ${config.publicBaseUrl}`, "Bootstrap");
 }
 
