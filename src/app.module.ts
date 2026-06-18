@@ -10,7 +10,11 @@ import { UsersModule } from "./modules/users/users.module";
 
 @Module({
   imports: [
-    MongooseModule.forRoot(config.mongodbUri),
+    MongooseModule.forRoot(config.mongodbUri,{
+      serverSelectionTimeoutMS: 5000,
+      connectTimeoutMS: 5000,
+      family: 4,
+    }),
     RedisModule,
     UsersModule,
     AuthModule,
