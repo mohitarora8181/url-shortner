@@ -9,7 +9,7 @@ import { config } from "./config/env";
 import express from "express";
 import { ExpressAdapter } from "@nestjs/platform-express";
 
-const server = express()
+const server = express();
 
 type ValidationErrorDetail = {
   property: string;
@@ -25,10 +25,13 @@ const formatValidationErrors = (errors: ValidationError[]): ValidationErrorDetai
   }));
 
 let isAppInitialized = false;
+let nestApp: any;
 
 async function bootstrap(): Promise<any> {
-  if (isAppInitialized) return;
-  const app = await NestFactory.create(AppModule , new ExpressAdapter(server));
+  if (isAppInitialized) return server;
+  
+  // Create NestJS app instance tied to Express
+  const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
 
   app.getHttpAdapter().getInstance().disable("x-powered-by");
   app.use(helmet());
@@ -39,9 +42,7 @@ async function bootstrap(): Promise<any> {
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
-      transformOptions: {
-        enableImplicitConversion: true
-      },
+      transformOptions: { enableImplicitConversion: true },
       exceptionFactory: (errors) =>
         new BadRequestException({
           message: "Validation failed",
@@ -50,11 +51,11 @@ async function bootstrap(): Promise<any> {
     })
   );
 
-  // await app.listen(config.port);
   await app.init();
   isAppInitialized = true;
-  Logger.log(`URL shortener API listening on ${config.publicBaseUrl}`, "Bootstrap");
+  Logger.log(`URL shortener API context initialized safely`, "Bootstrap");
 
+  // Only bind ports directly if we are running standard local node development
   if (process.env.NODE_ENV !== 'production') {
     await app.listen(config.port);
     Logger.log(`URL shortener API listening on http://localhost:${config.port}`, "Bootstrap");
@@ -63,8 +64,15 @@ async function bootstrap(): Promise<any> {
   return server;
 }
 
-void bootstrap().catch((err) => {
-  Logger.error("Bootstrap failed", err, "Bootstrap");
-});;
+// Local Environment Auto-Start
+if (process.env.NODE_ENV !== 'production') {
+  bootstrap().catch((err) => {
+    Logger.error("Local Bootstrap failed", err, "Bootstrap");
+  });
+}
 
-export default server;
+// CRITICAL FOR VERCEL: Export a function handler that awaits initialization on every serverless execution trigger
+export default async (req: any, res: any) => {
+  await bootstrap(); // This guarantees app.init() is 100% complete before request processing
+  return server(req, res);
+};
