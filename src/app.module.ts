@@ -10,7 +10,9 @@ import { UsersModule } from "./modules/users/users.module";
 
 @Module({
   imports: [
-    MongooseModule.forRoot(config.mongodbUri,{
+    MongooseModule.forRoot(process.env.MONGO_URI || config.mongodbUri, {
+      bufferCommands: false,
+      autoIndex: false,
       serverSelectionTimeoutMS: 5000,
       connectTimeoutMS: 5000,
       family: 4,
